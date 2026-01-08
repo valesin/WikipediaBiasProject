@@ -1,0 +1,14 @@
+# NOTE: Before submitting for academic publication, pin all package versions
+# Use: pip freeze > requirements.txt
+# This ensures reproducibility of results across different environments
+
+duckdb
+numpy
+pandas
+requests
+scipy
+SPARQLWrapper
+pyarrow
+seaborn
+psutil
+python-dotenv
