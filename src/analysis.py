@@ -856,6 +856,10 @@ def run_bias_analysis(
         logger.debug("Computing backbone scores")
         backbone_df = noise_corrected(lang_df, calculate_p_value=True)
 
+        # Preserve language_code column for filters that need it
+        if language_col in lang_df.columns:
+            backbone_df[language_col] = lang
+
         # Step 1: Merge metadata onto edges (no transformations yet)
         columns_to_merge = [col for col, _ in transformations]
 

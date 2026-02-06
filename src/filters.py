@@ -238,6 +238,12 @@ def restrict_by_pageviews_quantile(pageviews_df, quantile):
         key = (row["wikidata_id"], row["language_code"])
         pageviews_lookup[key] = row["pageviews"]
 
+    # Create a sum pageviews lookup for "all" language aggregation
+    # Key: wikidata_id, Value: sum of pageviews across all languages
+    sum_pageviews_lookup = (
+        pageviews_df.groupby("wikidata_id")["pageviews"].sum().to_dict()
+    )
+
     def filter_func(row):
         source_id = row.get("src")
         target_id = row.get("trg")
@@ -247,12 +253,16 @@ def restrict_by_pageviews_quantile(pageviews_df, quantile):
         if pd.isna(source_id) or pd.isna(target_id) or pd.isna(language):
             return False
 
-        # Look up pageviews for source and target
-        source_key = (source_id, language)
-        target_key = (target_id, language)
-
-        source_pageviews = pageviews_lookup.get(source_key, 0)
-        target_pageviews = pageviews_lookup.get(target_key, 0)
+        # Handle "all" language case: use sum of pageviews across all languages
+        if language == "all":
+            source_pageviews = sum_pageviews_lookup.get(source_id, 0)
+            target_pageviews = sum_pageviews_lookup.get(target_id, 0)
+        else:
+            # Look up pageviews for specific language
+            source_key = (source_id, language)
+            target_key = (target_id, language)
+            source_pageviews = pageviews_lookup.get(source_key, 0)
+            target_pageviews = pageviews_lookup.get(target_key, 0)
 
         # Check if both are above threshold
         return (source_pageviews >= threshold) and (target_pageviews >= threshold)
