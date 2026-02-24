@@ -1,3 +1,30 @@
+import re
+
+
+import re
+import pandas as pd
+import numpy as np
+
+
+def normalize_title(title: str) -> str:
+    """Remove parenthesised disambiguator and strip punctuation.
+    'Michael Jackson (singer)' -> 'Michael Jackson'
+    "Queen Victoria's" -> 'Queen Victorias'
+    """
+    if not isinstance(title, str):
+        return title.strip()
+    # Remove parenthesised content
+    title = re.sub(r"\s*\([^)]*\)", "", title)
+    return title.strip()
+
+
+def remove_punctuation(text: str) -> str:
+    """Remove punctuation from text, keeping letters, digits, and whitespace."""
+    if not isinstance(text, str):
+        return ""
+    return text
+
+
 """
 Data filtering functions for Wikipedia bias analysis.
 
@@ -19,7 +46,263 @@ Usage:
     )
 """
 
-import pandas as pd
+
+DEFAULT_STOPWORDS = {
+    # English
+    "the",
+    "of",
+    "and",
+    "or",
+    "in",
+    "on",
+    "at",
+    "by",
+    "for",
+    "with",
+    "a",
+    "an",
+    "to",
+    "from",
+    "as",
+    "is",
+    "was",
+    "are",
+    "were",
+    "king",
+    "emperor",
+    "saint",
+    "queen",
+    "prince",
+    "princess",
+    "duke",
+    "duchess",
+    "sir",
+    "lord",
+    "lady",
+    "mr",
+    "mrs",
+    "dr",
+    "count",
+    "baron",
+    "earl",
+    "marquis",
+    "viscount",
+    "pope",
+    "father",
+    # French
+    "le",
+    "la",
+    "les",
+    "un",
+    "une",
+    "des",
+    "de",
+    "du",
+    "et",
+    "ou",
+    "dans",
+    "sur",
+    "à",
+    "par",
+    "pour",
+    "avec",
+    "en",
+    "au",
+    "aux",
+    "roi",
+    "empereur",
+    "saint",
+    "sainte",
+    "reine",
+    "prince",
+    "princesse",
+    "duc",
+    "duchesse",
+    "seigneur",
+    "monsieur",
+    "madame",
+    "docteur",
+    "comte",
+    "baron",
+    "marquis",
+    "vicomte",
+    "pape",
+    "père",
+    # Spanish
+    "el",
+    "la",
+    "los",
+    "las",
+    "un",
+    "una",
+    "unos",
+    "unas",
+    "de",
+    "del",
+    "y",
+    "o",
+    "en",
+    "sobre",
+    "a",
+    "al",
+    "por",
+    "para",
+    "con",
+    "rey",
+    "emperador",
+    "santo",
+    "santa",
+    "san",
+    "reina",
+    "príncipe",
+    "princesa",
+    "duque",
+    "duquesa",
+    "señor",
+    "señora",
+    "doctor",
+    "conde",
+    "barón",
+    "marqués",
+    "vizconde",
+    "papa",
+    "padre",
+    # Italian
+    "il",
+    "lo",
+    "la",
+    "i",
+    "gli",
+    "le",
+    "un",
+    "uno",
+    "una",
+    "di",
+    "del",
+    "dello",
+    "della",
+    "dei",
+    "degli",
+    "delle",
+    "e",
+    "o",
+    "in",
+    "su",
+    "a",
+    "al",
+    "allo",
+    "alla",
+    "ai",
+    "agli",
+    "alle",
+    "per",
+    "con",
+    "da",
+    "dal",
+    "dallo",
+    "dalla",
+    "dai",
+    "dagli",
+    "dalle",
+    "re",
+    "imperatore",
+    "santo",
+    "santa",
+    "san",
+    "regina",
+    "principe",
+    "principessa",
+    "duca",
+    "duchessa",
+    "signore",
+    "signora",
+    "dottore",
+    "conte",
+    "barone",
+    "marchese",
+    "visconte",
+    "papa",
+    "padre",
+    # German
+    "der",
+    "die",
+    "das",
+    "den",
+    "dem",
+    "des",
+    "ein",
+    "eine",
+    "einer",
+    "eines",
+    "einem",
+    "einen",
+    "und",
+    "oder",
+    "in",
+    "auf",
+    "an",
+    "bei",
+    "von",
+    "für",
+    "mit",
+    "zu",
+    "zur",
+    "zum",
+    "aus",
+    "als",
+    "ist",
+    "war",
+    "sind",
+    "waren",
+    "könig",
+    "kaiser",
+    "sankt",
+    "königin",
+    "prinz",
+    "prinzessin",
+    "herzog",
+    "herzogin",
+    "herr",
+    "frau",
+    "doktor",
+    "graf",
+    "baron",
+    "markgraf",
+    "papst",
+    "vater",
+}
+
+
+def clean_entity_name(name, stopwords=None):
+    """
+    Cleans an entity name by:
+    - Removing content in parenthesis (e.g., 'Michael Jackson (singer)' -> 'Michael Jackson')
+    - Removing common words (stopwords) from the name
+    - Stripping extra whitespace
+
+    Parameters:
+    -----------
+    name : str
+        The entity name/title to clean.
+    stopwords : set or None
+        Set of words to remove from the name. If None, uses default set.
+
+    Returns:
+    --------
+    str : Cleaned entity name
+    """
+    if not isinstance(name, str):
+        return ""
+
+    stopwords = stopwords if stopwords is not None else DEFAULT_STOPWORDS
+
+    # Reuse existing normalization function instead of reinventing regex
+    name = normalize_title(name)
+
+    # Remove stopwords and short words
+    words = [w for w in name.split() if w.lower() not in stopwords and len(w) >= 3]
+    cleaned = " ".join(words)
+    return cleaned.strip()
 
 
 def restrict_years(min_year, max_year):
@@ -233,10 +516,12 @@ def restrict_by_pageviews_quantile(pageviews_df, quantile):
 
     # Create a lookup dictionary for fast access
     # Key: (wikidata_id, language_code), Value: pageviews
-    pageviews_lookup = {}
-    for _, row in pageviews_df.iterrows():
-        key = (row["wikidata_id"], row["language_code"])
-        pageviews_lookup[key] = row["pageviews"]
+    pageviews_lookup = dict(
+        zip(
+            zip(pageviews_df["wikidata_id"], pageviews_df["language_code"]),
+            pageviews_df["pageviews"],
+        )
+    )
 
     # Create a sum pageviews lookup for "all" language aggregation
     # Key: wikidata_id, Value: sum of pageviews across all languages
@@ -302,10 +587,12 @@ def restrict_by_pageviews_absolute(pageviews_df, min_pageviews):
 
     # Create a lookup dictionary for fast access
     # Key: (wikidata_id, language_code), Value: pageviews
-    pageviews_lookup = {}
-    for _, row in pageviews_df.iterrows():
-        key = (row["wikidata_id"], row["language_code"])
-        pageviews_lookup[key] = row["pageviews"]
+    pageviews_lookup = dict(
+        zip(
+            zip(pageviews_df["wikidata_id"], pageviews_df["language_code"]),
+            pageviews_df["pageviews"],
+        )
+    )
 
     def filter_func(row):
         source_id = row.get("src")
@@ -406,6 +693,7 @@ def exclude_edges_with_shared_names(custom_stopwords=None):
         "viscount",
         "pope",
         "father",
+        "de",
     }
 
     stopwords = custom_stopwords if custom_stopwords is not None else default_stopwords

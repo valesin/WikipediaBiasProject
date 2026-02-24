@@ -35,6 +35,29 @@ def _int_to_qid(qid_int: Optional[int]) -> str:
 
 
 class DuckDBHandler:
+    def get_titles_for_qids(self, qids: List[str], langs: List[str]) -> pd.DataFrame:
+        """
+        Returns a DataFrame with columns: wikidata_id, language_code, page_title
+        for all (qid, lang) pairs present in the database.
+        """
+        qid_ints = [_qid_to_int(qid) for qid in qids if _qid_to_int(qid) is not None]
+        if not qid_ints or not langs:
+            return pd.DataFrame(columns=["wikidata_id", "language_code", "page_title"])
+
+        placeholders_qids = ", ".join(["?"] * len(qid_ints))
+        placeholders_langs = ", ".join(["?"] * len(langs))
+        query = f"""
+            SELECT wikidata_id, language_code, page_title
+            FROM wiki_page
+            WHERE wikidata_id IN ({placeholders_qids})
+              AND language_code IN ({placeholders_langs})
+        """
+        params = qid_ints + langs
+        df = self._conn.execute(query, params).fetchdf()
+        if not df.empty:
+            df["wikidata_id"] = df["wikidata_id"].apply(_int_to_qid)
+        return df[["wikidata_id", "language_code", "page_title"]]
+
     """
     DuckDB implementation of CacheHandler.
 
@@ -46,6 +69,23 @@ class DuckDBHandler:
 
     This ensures downstream code can always assume Q prefix is present.
     """
+
+    def get_title_for_qid(self, qid: str, language_code: str) -> Optional[str]:
+        """
+        Returns the page title for the given QID and language code, or None if not found.
+        """
+        qid_int = _qid_to_int(qid)
+        if qid_int is None:
+            return None
+        query = """
+            SELECT page_title FROM wiki_page
+            WHERE wikidata_id = ? AND language_code = ?
+            LIMIT 1
+        """
+        result = self._conn.execute(query, [qid_int, language_code]).fetchone()
+        if result:
+            return result[0]
+        return None
 
     def __init__(self, db_filename: str):
         # Place DB in data folder if only filename is given
@@ -90,7 +130,7 @@ class DuckDBHandler:
     def __enter__(self):
         return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
     def _init_db(self):
