@@ -318,16 +318,14 @@ def read_edges_csv_and_filter_spurious(
             return False
         src_norm = normalize_title(str(src_title)).lower()
         trg_norm = normalize_title(str(trg_title)).lower()
-        src_words = [w for w in src_norm.split() if w not in stopwords and len(w) > 3]
-        trg_words = [w for w in trg_norm.split() if w not in stopwords and len(w) > 3]
-        if not trg_words:
+        src_words = src_norm.split()
+        trg_words = trg_norm.split()
+        if not trg_words or len(trg_words) > len(src_words):
             return False
-        idx = 0
-        for word in src_words:
-            if word == trg_words[idx]:
-                idx += 1
-                if idx == len(trg_words):
-                    return True
+        # Check if trg_words appear as a contiguous slice within src_words
+        for start in range(len(src_words) - len(trg_words) + 1):
+            if src_words[start : start + len(trg_words)] == trg_words:
+                return True
         return False
 
     df["ordered_substring"] = df.apply(ordered_substring_func, axis=1)
@@ -360,19 +358,6 @@ def read_edges_csv_and_filter_spurious(
             return np.nan
 
     df["z_score"] = df.apply(compute_z_score, axis=1)
-
-    # Add substring column
-    def is_wordwise_substring(src, trg):
-        if pd.isna(src) or pd.isna(trg):
-            return False
-        src_words = set(str(src).split())
-        trg_words = set(str(trg).split())
-        return any(word in src_words for word in trg_words)
-
-    df["substring"] = df.apply(
-        lambda row: is_wordwise_substring(row.get("src_title"), row.get("trg_title")),
-        axis=1,
-    )
 
     # Clean up and revert column names
     cols_to_drop = [
