@@ -32,7 +32,7 @@ def count_exact_matches_grouped(
     edges_df,
     src_extracts_dict: dict,
     tgt_titles_dict: dict,
-) -> tuple[list, list]:
+) -> list:
     """Count **exact** substring matches, grouping by source for speed.
 
     Uses ``str.count()`` (~50 ns per check) on normalised, lowercased
@@ -51,8 +51,7 @@ def count_exact_matches_grouped(
 
     Returns
     -------
-    tuple[list[int], list[int]]
-        Two lists of counts: target_counts, source_self_counts.
+    list[int]
         One count per row in *edges_df*, in the same order.
     """
     groups = _group_edges(edges_df, tgt_titles_dict)
@@ -71,19 +70,12 @@ def count_exact_matches_grouped(
         return _title_cache[raw]
 
     target_counts = [0] * len(edges_df)
-    source_self_counts = [0] * len(edges_df)
 
     for src_key, targets in tqdm(groups.items(), desc="Source groups (exact)"):
         extract = src_extracts_dict.get(src_key)
         if not extract:
             continue
-        norm_extract = extract
-        if not norm_extract:
-            continue
-        extract_lower = norm_extract.lower()
-
-        src_title_raw = tgt_titles_dict.get(src_key)  # src_key = (qid, lang)
-        src_title_norm = _norm_title(src_title_raw) if src_title_raw else None
+        extract_lower = extract.lower()
 
         for idx, tgt_title_raw in targets:
             if not tgt_title_raw:
@@ -91,16 +83,9 @@ def count_exact_matches_grouped(
             key = _norm_title(tgt_title_raw)
             if key is None:
                 continue
-            n_matches = extract_lower.count(key)
-            if n_matches == 0:
-                continue
-            # If key is a substring of src_title_norm and not an exact match, count as source self-mention
-            if src_title_norm and key != src_title_norm and key in src_title_norm:
-                source_self_counts[idx] = n_matches
-            else:
-                target_counts[idx] = n_matches
+            target_counts[idx] = extract_lower.count(key)
 
-    return target_counts, source_self_counts
+    return target_counts
 
 
 def count_fuzzy_matches_grouped(
