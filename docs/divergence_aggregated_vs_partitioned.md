@@ -11,7 +11,7 @@ The aggregated plots are built on a **different network with different denominat
 
 2. **Noise-Corrected p‑value depends on marginals**  
    * Code: Backbone scores come from binomial CDF using row/column sums (`modules/backboning.py`, lines 131‑203). When degrees explode in the aggregated layer, the prior probability (`mean_prior_probability`) rises, reducing `score` for edges attached to dominant groups.  
-   * Effect: Aggregation penalises hubs from over-represented groups, which can flatten or invert gender/region effects compared with language-specific plots where those hubs were extreme outliers.
+  * Effect: Aggregation penalizes hubs from over-represented groups, which can flatten or invert gender/region effects compared with language-specific plots where those hubs were extreme outliers.
 
 3. **Pageview filters behave differently for “all”**  
   * Code: `restrict_by_pageviews_quantile` uses **per-language quantiles** and **the sum of pageviews across languages** for the `all` layer (`filters.py`, lines 541‑554).  
@@ -34,7 +34,7 @@ The aggregated plots are built on a **different network with different denominat
 * **Directional flips are expected** when:  
   * Dominant languages differ in composition from smaller ones.  
   * Filters (pageviews, years) select different node sets per language than in aggregate.  
-  * The backbone penalises high-degree hubs differently once edges are pooled.
+  * The backbone penalizes high-degree hubs differently once edges are pooled.
 
 ## Suggestions to reconcile or co-report
 

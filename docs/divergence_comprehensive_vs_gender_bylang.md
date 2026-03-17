@@ -20,7 +20,7 @@ These choices together yield AUCs that are usually ~0.99 (e.g., the AUC CSVs sto
 Although the historical `02_gender_bylang.py` file is not in the repository, the following concrete behaviors in the comprehensive pipeline would materially diverge from a simpler “gender by language” script and explain direction/scale changes in plots:
 
 1. **Backbone vs. raw weight or proportions**  
-   * Comprehensive: uses noise-corrected **p‑values** (`score`) driven by row/column marginals, not raw counts. This emphasises *unexpectedness* rather than magnitude.  
+   * Comprehensive: uses noise-corrected **p‑values** (`score`) driven by row/column marginals, not raw counts. This emphasizes *unexpectedness* rather than magnitude.  
    * A basic gender-by-language script typically uses raw edge weights, degree-normalised proportions, or simple ratios of female↔male edges. Switching from p‑value significance to magnitude reverses which edges rank highest and will flip or flatten retention curves.  
    * Evidence: `analysis.py` line 857 calls `noise_corrected(..., calculate_p_value=True)`; AUC is then computed over `score` (`analysis.py` lines 218‑255).
 
@@ -41,7 +41,7 @@ Although the historical `02_gender_bylang.py` file is not in the repository, the
    * A sweep-based or degree-weighted node retention (common in quick scripts) counts nodes that stay connected after removing sub-threshold edges overall, not just via their strongest tie, producing steeper drop-offs and different AUC ordering.
 
 6. **Log-space thresholds near 1**  
-   * The grid emphasises 0.999999… thresholds (`analysis.py` lines 523‑525). If `02_gender_bylang.py` used a linear grid over [0,1] or a fixed density cutoff, the resulting curves/AUCs would emphasise different parts of the distribution, easily reversing “which curve is above.”
+   * The grid emphasizes 0.999999… thresholds (`analysis.py` lines 523‑525). If `02_gender_bylang.py` used a linear grid over [0,1] or a fixed density cutoff, the resulting curves/AUCs would emphasize different parts of the distribution, easily reversing “which curve is above.”
 
 7. **Filtering of zero weights and self-loops**  
    * Comprehensive explicitly removes zero weights before scoring (`analysis.py` line 812) and self-loops earlier in the notebook. Scripts that include them increase low-score mass, steepening curves in the opposite direction.
