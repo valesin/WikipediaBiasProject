@@ -1,6 +1,6 @@
 # Why the Comprehensive Pipeline Plots Diverge from `02_gender_bylang.py`
 
-> Scope: Evidence and code-path analysis for the large differences between the plots produced by `notebooks/comprehensive_bias_analysis_plots.ipynb` and the earlier `notebooks/michele/02_gender_bylang.py` workflow. The latter file is not present in the current repository history, so the comparison below isolates the concrete behaviours of the comprehensive pipeline and highlights the code-level mechanisms that would diverge from a simpler per-language gender script.
+> Scope: Evidence and code-path analysis for the large differences between the plots produced by `notebooks/comprehensive_bias_analysis_plots.ipynb` and the earlier `notebooks/michele/02_gender_bylang.py` workflow. The latter file is not present in the current repository history, so the comparison below isolates the concrete behaviors of the comprehensive pipeline and highlights the code-level mechanisms that would diverge from a simpler per-language gender script.
 
 ## What the current comprehensive notebook actually computes
 
@@ -17,7 +17,7 @@ These choices together yield AUCs that are usually ~0.99 (e.g., the AUC CSVs sto
 
 ## Likely points of divergence from `02_gender_bylang.py`
 
-Although the historical `02_gender_bylang.py` file is not in the repository, the following concrete behaviours in the comprehensive pipeline would materially diverge from a simpler “gender by language” script and explain direction/scale changes in plots:
+Although the historical `02_gender_bylang.py` file is not in the repository, the following concrete behaviors in the comprehensive pipeline would materially diverge from a simpler “gender by language” script and explain direction/scale changes in plots:
 
 1. **Backbone vs. raw weight or proportions**  
    * Comprehensive: uses noise-corrected **p‑values** (`score`) driven by row/column marginals, not raw counts. This emphasises *unexpectedness* rather than magnitude.  
