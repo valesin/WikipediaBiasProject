@@ -14,7 +14,7 @@ The aggregated plots are built on a **different network with different denominat
    * Effect: Aggregation penalises hubs from over-represented groups, which can flatten or invert gender/region effects compared with language-specific plots where those hubs were extreme outliers.
 
 3. **Pageview filters behave differently for “all”**  
-   * Code: `restrict_by_pageviews_quantile` uses **per-language quantiles** but falls back to **sum of pageviews across languages** for the `all` layer (`filters.py`, lines 541‑554).  
+  * Code: `restrict_by_pageviews_quantile` uses **per-language quantiles** and **the sum of pageviews across languages** for the `all` layer (`filters.py`, lines 541‑554).  
    * Effect: The set of nodes that survive filtering in `all` is not the union of per-language survivors; it is biased toward cross-lingual celebrities, again skewing marginals.
 
 4. **Minimum edge threshold masks asymmetries**  

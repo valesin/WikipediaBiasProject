@@ -8,12 +8,12 @@
 * **Aggregation step** – `run_bias_analysis` **adds a synthetic `all` language** by summing weights across languages *before* any scoring (`analysis.py`, lines 817‑825). Every subsequent calculation is therefore executed both on per-language slices and on this pooled layer.  
 * **Backbone score, not raw weight** – For each language slice, edges are re‑weighted with the **Noise-Corrected backbone** (binomial CDF–based p‑value) (`analysis.py`, line 857; `modules/backboning.py`, lines 131‑203). The score is the tail probability of observing \(nij\) given row/column totals, not the raw edge frequency.  
 * **Attribute enrichment and transformation** – Node attributes are merged and transformed: `bigperiod_birth` is collapsed into five bins and `un_subregion` is collapsed into `Western`/`Non‑Western` (`analysis.py`, lines 864‑909). Rows with NaNs for the analysed attribute are dropped *per attribute* (`analysis.py`, lines 507‑516).  
-* **Threshold grid and retention definitions** – Thresholds are **log-spaced extremely close to 1** (10^{-14}→1; `analysis.py`, lines 523‑525).  
+* **Threshold grid and retention definitions** – Thresholds are **log-spaced extremely close to 1** (10^-14→1; `analysis.py`, lines 523‑525).  
   * Edge retention is the fraction of edges with `score >= t` per source→target attribute pair, and AUC is the trapezoid of that curve (`analysis.py`, lines 218‑255).  
   * Node retention is computed with the **max-edge approach**: a node is retained at threshold \(t\) if its *highest* incident backbone score exceeds \(t\) (`analysis.py`, lines 399‑455).  
 * **Reliability gate** – Any pair/value with `< min_edges` (default 500) is masked for curves and for AUC heatmaps (`analysis.py`, lines 734‑770, 993‑1109). Sparse groups vanish entirely.
 
-These choices together yield AUCs that are usually ~0.99 (visible in cached CSVs from `bias_analysis_pageview_filtered.ipynb`), because scores are already near 1 and the threshold grid is concentrated near 1. Small differences in backbone scores translate into visually tiny separations in curves but still integrate to large AUC differences.
+These choices together yield AUCs that are usually ~0.99 (e.g., the AUC CSVs stored under `data/out/plots/.../auc/` when `bias_analysis_pageview_filtered.ipynb` is run), because scores are already near 1 and the threshold grid is concentrated near 1. Small differences in backbone scores translate into visually tiny separations in curves but still integrate to large AUC differences.
 
 ## Likely points of divergence from `02_gender_bylang.py`
 
