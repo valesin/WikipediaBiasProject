@@ -7,7 +7,7 @@
 * **Input handling** – `comprehensive_bias_analysis_plots.ipynb` loads the Spotlight-weighted edges and metadata, drops self-loops, and calls `analysis.run_bias_analysis` (see notebook cells 4, 6, 9).  
 * **Aggregation step** – `run_bias_analysis` **adds a synthetic `all` language** by summing weights across languages *before* any scoring (`analysis.py`, lines 817‑825). Every subsequent calculation is therefore executed both on per-language slices and on this pooled layer.  
 * **Backbone score, not raw weight** – For each language slice, edges are re‑weighted with the **Noise-Corrected backbone** (binomial CDF–based p‑value) (`analysis.py`, line 857; `modules/backboning.py`, lines 131‑203). The score is the tail probability of observing \(nij\) given row/column totals, not the raw edge frequency.  
-* **Attribute enrichment and transformation** – Node attributes are merged and transformed: `bigperiod_birth` is collapsed into five bins and `un_subregion` is collapsed into `Western`/`Non‑Western` (`analysis.py`, lines 864‑909). Rows with NaNs for the analysed attribute are dropped *per attribute* (`analysis.py`, lines 507‑516).  
+* **Attribute enrichment and transformation** – Node attributes are merged and transformed: `bigperiod_birth` is collapsed into five bins and `un_subregion` is collapsed into `Western`/`Non‑Western` (`analysis.py`, lines 864‑909). Rows with NaNs for the analyzed attribute are dropped *per attribute* (`analysis.py`, lines 507‑516).  
 * **Threshold grid and retention definitions** – Thresholds are **log-spaced extremely close to 1** (10^-14→1; `analysis.py`, lines 523‑525).  
   * Edge retention is the fraction of edges with `score >= t` per source→target attribute pair, and AUC is the trapezoid of that curve (`analysis.py`, lines 218‑255).  
   * Node retention is computed with the **max-edge approach**: a node is retained at threshold \(t\) if its *highest* incident backbone score exceeds \(t\) (`analysis.py`, lines 399‑455).  
@@ -26,7 +26,7 @@ Although the historical `02_gender_bylang.py` file is not in the repository, the
 
 2. **Pre-aggregation across languages**  
    * Comprehensive: synthesises an `all` layer by *summing weights across languages first* (`analysis.py` lines 817‑825). This boosts English-heavy or cross-language-popular nodes and changes both the marginals (ni., n.j, n..) and the derived p‑values for every edge.  
-   * A per-language script would analyse each language independently with its native weight distribution, so the global “all” patterns (often male/Western-heavy) leak into every comparison in the comprehensive pipeline when plots mix aggregated and sliced outputs.
+   * A per-language script would analyze each language independently with its native weight distribution, so the global “all” patterns (often male/Western-heavy) leak into every comparison in the comprehensive pipeline when plots mix aggregated and sliced outputs.
 
 3. **Strict min-edge gating**  
    * Comprehensive: drops any attribute pair with <500 edges from both curves and heatmaps (e.g., Female→Other often disappears). This removes the long tail and leaves only the densest relations, inflating AUCs and reducing asymmetry.  
@@ -34,7 +34,7 @@ Although the historical `02_gender_bylang.py` file is not in the repository, the
 
 4. **Attribute recoding and NaN dropping**  
    * Comprehensive collapses `un_subregion` to Western/Non-Western and `bigperiod_birth` into 5 buckets, then drops rows where *either* endpoint has NaN for that attribute (`analysis.py` lines 507‑516).  
-   * If `02_gender_bylang.py` worked on uncollapsed regions or did not drop NaNs per attribute, the analysed population differs, altering the base rates used in bias calculations.
+   * If `02_gender_bylang.py` worked on uncollapsed regions or did not drop NaNs per attribute, the analyzed population differs, altering the base rates used in bias calculations.
 
 5. **Node-retention metric choice**  
    * Comprehensive uses the **max-edge** method (retain node if any incident edge survives threshold; `analysis.py` lines 399‑455). This favours high-degree nodes and dampens attrition for dominant groups.  

@@ -23,7 +23,7 @@ The aggregated plots are built on a **different network with different denominat
 
 5. **Attribute-level NaN dropping is per attribute, not per dataset**  
    * Code: Rows with NaNs in the attribute under study are dropped before computing retention for that attribute (`analysis.py`, lines 507‑516). Metadata coverage varies by language.  
-   * Effect: The analysed population for `gender` in a low-coverage language is smaller and differently composed than in the aggregated layer, changing base rates and retention curves.
+  * Effect: The analyzed population for `gender` in a low-coverage language is smaller and differently composed than in the aggregated layer, changing base rates and retention curves.
 
 6. **Simpson’s paradox from mixing languages with opposing trends**  
    * Research angle: Languages differ in gender balance, editorial norms, and coverage of regions/periods. Aggregating mixes them with weights proportional to edge volume. A small female advantage in a high-volume language can overwhelm a male advantage in low-volume languages, reversing the aggregate direction.
